@@ -24,7 +24,7 @@ def read_file(input_json: str):
 read_file_tool = Tool(
     name="read_file",
     description="Reads the content of a given file path. Input: JSON with {'path': '<relative path>'}. Output: file content as string.",
-    func=read_file,
+    func=read_file
 )
 
 

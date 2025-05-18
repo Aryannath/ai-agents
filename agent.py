@@ -84,7 +84,8 @@ class Agent:
                 max_tokens=1024,
                 temperature=0.7
             )
-            print(response)
+            # print(conversation)
+            # print(response)
             return response.choices[0].message.content
         except Exception as e:
             print(f"Error during inference: {e}")
