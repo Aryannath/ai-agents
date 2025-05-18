@@ -7,7 +7,7 @@ import os
 load_dotenv()
 
 def main():
-    client = anthropic.Client(os.getenv("ANTHROPIC_API_KEY"))
+    client = anthropic.Client(api_key= os.getenv("ANTHROPIC_API_KEY")) 
     agent = Agent(client, get_user_message)
     agent.run()
 
