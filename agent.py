@@ -15,7 +15,7 @@ class Agent:
 
     def run(self):
 
-        print("\nChat with GEMINI (type 'exit' or 'ctrl+c' to quit)\n")
+        print("\nChat with LLAMA (type 'exit' or 'ctrl+c' to quit)\n")
         
         try:
             while True:
@@ -49,16 +49,16 @@ class Agent:
                     else:
                         tool_result = f"Error: Tool '{tool_name}' not found."
 
-                    # Append tool result as user message and ask model again
-                    if tool_result.lower().startswith("error"):
-                        self.conversation.append({"role": "assistant", "content": message})
-                        self.conversation.append({"role": "function", "content": tool_result}) # error will be registered as function it was earlier user
-                        print(f"\nAI 🤖: {tool_result}\n")
+                    # Detect if the tool_result contains an error skip if does move to next user input{only code that needs to be changed}
+                    if isinstance(tool_result, str) and tool_result.startswith("Error:"):
+                        error_message = f"Tool returned an error: {tool_result}"
+                        print(f"\nAI 🤖: {error_message}\n")
+                        self.conversation.append({"role": "assistant", "content": error_message})
                         print("\n" + "-"*60 + "\n")
                         continue
 
                     self.conversation.append({"role": "assistant", "content": message})
-                    self.conversation.append({"role": "function", "content": tool_result}) # changed role from user to function
+                    self.conversation.append({"role": "user", "content": tool_result})
 
                     # Run inference again to get final reply
                     response = self.run_inference(self.conversation)
@@ -81,16 +81,7 @@ class Agent:
             tool_descriptions = "\n".join(
                 [f"Tool: {t.name} - {t.description}" for t in self.tools]
             )
-            system_prompt = (
-                f"You have access to the following tools:\n{tool_descriptions}\n\n"
-                "When you need to use a tool, you MUST respond with ONLY a valid Python dictionary in the EXACT format:\n"
-                "{'tool_use': {'name': <tool_name>, 'input': <json_string>}}\n\n"
-                "- Do NOT include any explanation, reasoning, or text outside the dictionary.\n"
-                "- Do NOT preface the response with messages like 'I will use the tool' or 'Here is the input'.\n"
-                "- Do NOT wrap the dictionary in quotes or markdown.\n"
-                "- If no tool is needed, respond normally in natural language.\n"
-                "- Invalid or extra text outside the dictionary is NOT allowed and will be treated as an error.\n"
-            )
+            system_prompt = f"You have access to the following tools:\n{tool_descriptions}\nIf you want to use a tool, only respond the dictionary not reasoning, respond in the format:\n{{'tool_use': {{'name': <tool_name>, 'input': <json_string>}}}}\nOtherwise, respond normally."
 
             conversation = [{"role": "system", "content": system_prompt}] + conversation
 
@@ -100,10 +91,7 @@ class Agent:
                 max_tokens=1024,
                 temperature=0.7
             )
-            # print(conversation)
             return response.choices[0].message.content
         except Exception as e:
             print(f"Error during inference: {e}")
             return None
-        
-
