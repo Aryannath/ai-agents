@@ -49,7 +49,7 @@ class Agent:
                     else:
                         tool_result = f"Error: Tool '{tool_name}' not found."
 
-                    # Detect if the tool_result contains an error skip if does move to next user input{only code that needs to be changed}
+                    # Detect if the tool_result contains an error skip if does move to next user input
                     if isinstance(tool_result, str) and tool_result.startswith("Error:"):
                         error_message = f"Tool returned an error: {tool_result}"
                         print(f"\nAI 🤖: {error_message}\n")
